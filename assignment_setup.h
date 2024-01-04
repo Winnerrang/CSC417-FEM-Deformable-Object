@@ -187,8 +187,9 @@ inline void assignment_setup(Eigen::VectorXd &q, Eigen::VectorXd &qdot) {
 
 //Variable for geometry
 Eigen::MatrixXd V; //vertices of simulation mesh 
-Eigen::MatrixXi T; //faces of simulation mesh
-Eigen::MatrixXi F; //faces of simulation mesh
+Eigen::MatrixXi T; //faces of simulation tetrahedral mesh
+Eigen::MatrixXi F; //faces of simulation face mesh, this should be empty 
+                   //because we are using tetrahedral mesh    
 
 //variables for skinning
 Eigen::MatrixXd V_skin;
@@ -323,7 +324,11 @@ bool key_down_callback(igl::opengl::glfw::Viewer &viewer, unsigned char key, int
 inline void assignment_setup(int argc, char **argv, Eigen::VectorXd &q, Eigen::VectorXd &qdot) {
 
     //load geometric data 
+
+    // read the tetrahedral mesh
     igl::readMESH("../data/coarser_bunny.mesh",V,T, F);
+
+    // read the high resolution mesh
     igl::readOBJ("../data/bunny_skin.obj", V_skin, F_skin);
 
     if(argc > 1) {
@@ -336,6 +341,11 @@ inline void assignment_setup(int argc, char **argv, Eigen::VectorXd &q, Eigen::V
         }
     }
     
+
+    std::cout <<"V: "<<V.rows() << ", " << V.cols() 
+              << " T: " << T.rows() << ", " << T.cols() 
+              << " F: " << F.rows() << ", " << F.cols() << "\n";
+
     igl::boundary_facets(T, F);
     F = F.rowwise().reverse().eval();
     
