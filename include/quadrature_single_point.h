@@ -12,7 +12,10 @@ template<typename Ret, typename Integrand_Func>
 inline void quadrature_single_point(Ret &&integrated, Eigen::Ref<const Eigen::VectorXd> q, 
                                                Eigen::Ref<const Eigen::RowVectorXi> element, double volume,
                                                Integrand_Func integrand) {
+    
 
-
+    // the X does not matter
+    integrand(integrated, q, element, q.segment<3>(3 * element(0)));
+    integrated = volume * integrated;
 }
 
