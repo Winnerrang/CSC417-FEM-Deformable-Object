@@ -237,6 +237,7 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
     Eigen::Vector6d dV_mouse;
     double k_selected_now = (Visualize::is_mouse_dragging() ? k_selected : 0.);
     
+    //create a spring for each picked vertex
     for(unsigned int pickedi = 0; pickedi < Visualize::picked_vertices().size(); pickedi++) {   
         spring_points.push_back(std::make_pair((P.transpose()*q+x0).segment<3>(3*Visualize::picked_vertices()[pickedi]) + Visualize::mouse_drag_world() + Eigen::Vector3d::Constant(1e-6),3*Visualize::picked_vertices()[pickedi]));
     }
@@ -245,17 +246,20 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
         double E = 0;
         Eigen::VectorXd newq = P.transpose()*(q+dt*qdot_1)+x0;
 
+        // potential energy for each tetrahedron
         for(unsigned int ei=0; ei<T.rows(); ++ei) {
             
             V_linear_tetrahedron(V_ele,newq , V, T.row(ei), v0(ei), C, D);
             E += V_ele;
         }
 
+        // potential energy for each spring created when dragging
         for(unsigned int pickedi = 0; pickedi < spring_points.size(); pickedi++) {   
             V_spring_particle_particle(V_ele, spring_points[pickedi].first, newq.segment<3>(spring_points[pickedi].second), 0.0, k_selected_now);
             E += V_ele;
         }
 
+        // kinetic energy
         E += 0.5*(qdot_1 - qdot).transpose()*M*(qdot_1 - qdot);
 
         return E;
@@ -263,26 +267,26 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
 
     auto force = [&](Eigen::VectorXd &f, Eigen::Ref<const Eigen::VectorXd> q2, Eigen::Ref<const Eigen::VectorXd> qdot2) { 
         
-            assemble_forces(f, P.transpose()*q2+x0, P.transpose()*qdot2, V, T, v0, C,D);
+        assemble_forces(f, P.transpose()*q2+x0, P.transpose()*qdot2, V, T, v0, C,D);
 
-            for(unsigned int pickedi = 0; pickedi < spring_points.size(); pickedi++) {
-                dV_spring_particle_particle_dq(dV_mouse, spring_points[pickedi].first, (P.transpose()*q2+x0).segment<3>(spring_points[pickedi].second), 0.0, k_selected_now);
-                f.segment<3>(3*Visualize::picked_vertices()[pickedi]) -= dV_mouse.segment<3>(3);
-            }
+        for(unsigned int pickedi = 0; pickedi < spring_points.size(); pickedi++) {
+            dV_spring_particle_particle_dq(dV_mouse, spring_points[pickedi].first, (P.transpose()*q2+x0).segment<3>(spring_points[pickedi].second), 0.0, k_selected_now);
+            f.segment<3>(3*Visualize::picked_vertices()[pickedi]) -= dV_mouse.segment<3>(3);
+        }
 
-            f = P*f; 
-        };
+        f = P*f; 
+    };
 
-        //assemble stiffness matrix,
-        auto stiffness = [&](Eigen::SparseMatrixd &K, Eigen::Ref<const Eigen::VectorXd> q2, Eigen::Ref<const Eigen::VectorXd> qdot2) { 
-            assemble_stiffness(K, P.transpose()*q2+x0, P.transpose()*qdot2, V, T, v0, C, D);
-            K = P*K*P.transpose();
-        };
+    //assemble stiffness matrix,
+    auto stiffness = [&](Eigen::SparseMatrixd &K, Eigen::Ref<const Eigen::VectorXd> q2, Eigen::Ref<const Eigen::VectorXd> qdot2) { 
+        assemble_stiffness(K, P.transpose()*q2+x0, P.transpose()*qdot2, V, T, v0, C, D);
+        K = P*K*P.transpose();
+    };
 
-        if(fully_implicit)
-            implicit_euler(q, qdot, dt, M, energy, force, stiffness, tmp_qdot, tmp_force, tmp_stiffness);
-        else
-            linearly_implicit_euler(q, qdot, dt, M, force, stiffness, tmp_force, tmp_stiffness);
+    if(fully_implicit)
+        implicit_euler(q, qdot, dt, M, energy, force, stiffness, tmp_qdot, tmp_force, tmp_stiffness);
+    else
+        linearly_implicit_euler(q, qdot, dt, M, force, stiffness, tmp_force, tmp_stiffness);
         
 
         
