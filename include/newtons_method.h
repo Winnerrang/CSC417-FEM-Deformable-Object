@@ -20,7 +20,9 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 	double tol = 1e-6;
 	double alpha_tolerance = 1e-10;
 	Eigen::VectorXd d;
+	Eigen::SparseLU<Eigen::SparseMatrix<double>> solver;
 
+	
 	while (step < maxSteps) {
 
 		double oldEnergy = currentEnergy;
@@ -28,7 +30,8 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 		g(tmp_g, x0);
 		H(tmp_H, x0);
 
-		d = -tmp_H.ldlt().solve(tmp_g);
+		solver.compute(tmp_H);
+		d = -solver.solve(tmp_g);
 
 		double alpha = 10000;
 
