@@ -35,6 +35,7 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 
 		double alpha = 10000;
 
+		// line search
 		while (f(x0 + alpha * d) > currentEnergy) {
 			
 			// can't find a good step size, so just return
