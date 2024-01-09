@@ -2,6 +2,7 @@
 #include <dphi_linear_tetrahedron_dX.h>
 #include <d2psi_neo_hookean_dq2.h>
 #include <quadrature_single_point.h>
+#include <iostream>
 
 void d2V_linear_tetrahedron_dq2(Eigen::Matrix1212d &H, Eigen::Ref<const Eigen::VectorXd> q, 
                           Eigen::Ref<const Eigen::MatrixXd> V, Eigen::Ref<const Eigen::RowVectorXi> element, double volume,
