@@ -7,6 +7,6 @@ void dV_spring_particle_particle_dq(Eigen::Ref<Eigen::Vector6d> f, Eigen::Ref<co
 	double l = q.norm();
 	Eigen::Vector3d q_unit = q.normalized();
 	double dV = stiffness * (l - l0);
-	f.segment<3>(0) = dV * q_unit;
-	f.segment<3>(3) = -dV * q_unit;
+	f.segment<3>(0) = -dV * q_unit;
+	f.segment<3>(3) = dV * q_unit;
 }
