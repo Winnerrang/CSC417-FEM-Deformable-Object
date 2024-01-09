@@ -1,5 +1,6 @@
 #include <dpsi_neo_hookean_dF.h>
 #include <cmath>
+#include <iostream>
 void dpsi_neo_hookean_dF(Eigen::Vector9d &dw, Eigen::Ref<const Eigen::Matrix3d> F, double C, double D) {
 
     double F11 = F(0, 0);
@@ -12,9 +13,11 @@ void dpsi_neo_hookean_dF(Eigen::Vector9d &dw, Eigen::Ref<const Eigen::Matrix3d> 
     double F32 = F(2, 1);
     double F33 = F(2, 2);
 
+
     double J = F.determinant();
     double F_square_Norm = (F.transpose() * F).trace();
     double repeatedPattern = F11 * F23 * F32 - F11 * F22 * F33 + F12 * F21 * F33 - F12 * F23 * F31 - F13 * F21 * F32 + F13 * F22 * F31;
+
     dw(0) = C * ((2 * F11) / pow(J, 2.0/3.0) - (2 * (F22 * F33 - F23 * F32) * (F_square_Norm)) / (3 * pow(J, 5.0/3.0))) - 2 * D * (F22 * F33 - F23 * F32) * (repeatedPattern + 1);
     dw(1) = C * ((2 * F12) / pow(J, 2.0/3.0) + (2 * (F21 * F33 - F23 * F31) * (F_square_Norm)) / (3 * pow(J, 5.0/3.0))) + 2 * D * (F21 * F33 - F23 * F31) * (repeatedPattern + 1);
     dw(2) = C * ((2 * F13) / pow(J, 2.0/3.0) - (2 * (F21 * F32 - F22 * F31) * (F_square_Norm)) / (3 * pow(J, 5.0/3.0))) - 2 * D * (F21 * F32 - F22 * F31) * (repeatedPattern + 1);

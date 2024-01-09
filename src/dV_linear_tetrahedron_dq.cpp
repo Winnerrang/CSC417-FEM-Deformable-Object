@@ -17,8 +17,8 @@ void dV_linear_tetrahedron_dq(Eigen::Vector12d &dV, Eigen::Ref<const Eigen::Vect
     dphi_linear_tetrahedron_dX(dphidX, V, element, Eigen::Vector3d::Zero());
 
     // [x0 x1 x2 x3]
-    Eigen::MatrixXd q_temp;
-    q_temp.resize(3, 4);
+    // Can't use MatrixXd because it will create calculation error in release mode
+    Eigen::Matrix34d q_temp;
     q_temp.col(0) = q.segment<3>(3 * element(0));
     q_temp.col(1) = q.segment<3>(3 * element(1));
     q_temp.col(2) = q.segment<3>(3 * element(2));
@@ -29,14 +29,13 @@ void dV_linear_tetrahedron_dq(Eigen::Vector12d &dV, Eigen::Ref<const Eigen::Vect
 
 
     // F = Bj * qj
-    Eigen::MatrixXd Bj;
-    Bj.resize(9, 12);
-    Bj = Eigen::MatrixXd::Zero(9, 12);
+    Eigen::Matrix<double, 9, 12> Bj;
+    Bj.setZero();
 
     for (int i = 0; i < 3; i++) {
         for (int col = 0; col < dphidX.cols(); col++) {
             for (int row = 0; row < dphidX.rows(); row++) {
-                Bj(3 * i + col, 3 * row) = dphidX(row, col);
+                Bj(3 * i + col, 3 * row + i) = dphidX(row, col);
             }
         }
     }

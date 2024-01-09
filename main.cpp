@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 
     std::cout<<a1<<"\n";
     std::cout<<a2.transpose()<<"\n";*/
-
+    
     return 1; 
 
 }

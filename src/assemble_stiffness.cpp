@@ -1,13 +1,13 @@
 #include <assemble_stiffness.h>
 #include <d2V_linear_tetrahedron_dq2.h>
-
+#include <iostream>
 void assemble_stiffness(Eigen::SparseMatrixd &K, Eigen::Ref<const Eigen::VectorXd> q, Eigen::Ref<const Eigen::VectorXd> qdot, 
                      Eigen::Ref<const Eigen::MatrixXd> V, Eigen::Ref<const Eigen::MatrixXi> T, Eigen::Ref<const Eigen::VectorXd> v0, 
                      double C, double D) { 
         
     K.setZero();
 
-    for (int tetraIdx = 0; tetraIdx < T.rows(); tetraIdx) {
+    for (int tetraIdx = 0; tetraIdx < T.rows(); tetraIdx++) {
         Eigen::Matrix1212d d2Vdq2;
 
         d2V_linear_tetrahedron_dq2(d2Vdq2, q, V, T.row(tetraIdx), v0(tetraIdx), C, D);

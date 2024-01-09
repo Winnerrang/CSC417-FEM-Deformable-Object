@@ -20,12 +20,13 @@ void build_skinning_matrix(Eigen::SparseMatrixd &N, Eigen::Ref<const Eigen::Matr
     N.resize(V_skin.rows() * 3, V.rows() * 3);
     N.setZero();
 
-
     for (int vertexIdx = 0; vertexIdx < V_skin.rows(); vertexIdx++) {
+
         Eigen::Vector4d phi;
 
         int tetra_idx = -1;
         for (int tetIdx = 0; tetIdx < T.rows(); tetIdx++) {
+            //std::cout << "tetIdx: " << tetIdx << std::endl;
 			Eigen::RowVector4i tet = T.row(tetIdx);
             Eigen::RowVector3d p1 = V.row(tet(0));
 			Eigen::RowVector3d p2 = V.row(tet(1));
@@ -49,5 +50,6 @@ void build_skinning_matrix(Eigen::SparseMatrixd &N, Eigen::Ref<const Eigen::Matr
 			N.coeffRef(3 * vertexIdx + dim, 3 * T(tetra_idx, 2) + dim) = phi(2);
 			N.coeffRef(3 * vertexIdx + dim, 3 * T(tetra_idx, 3) + dim) = phi(3);
 		}
+
     }
 }

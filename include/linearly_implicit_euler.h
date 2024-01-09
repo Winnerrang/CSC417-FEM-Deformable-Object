@@ -2,6 +2,7 @@
 #include <Eigen/Sparse>
 #include<Eigen/SparseCholesky>
 #include <EigenTypes.h>
+#include <iostream>
 
 //Input:
 //  q - generalized coordinates for the FEM system

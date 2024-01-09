@@ -354,7 +354,7 @@ inline void assignment_setup(int argc, char **argv, Eigen::VectorXd &q, Eigen::V
     F = F.rowwise().reverse().eval();
     
     build_skinning_matrix(N, V, T, V_skin);
-
+    std::cout << "Finish building Skinning Matrix \n";
     //setup simulation 
     init_state(q,qdot,V);
 
@@ -411,6 +411,8 @@ inline void assignment_setup(int argc, char **argv, Eigen::VectorXd &q, Eigen::V
     q = P*q;
     qdot = P*qdot;
     M = P*M*P.transpose();
+
+    std::cout << "Finish set up\n";
 
     //igl additional menu setup
     // Add content to the default menu window
