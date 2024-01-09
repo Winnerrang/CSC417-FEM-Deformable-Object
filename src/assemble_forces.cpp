@@ -18,7 +18,6 @@ void assemble_forces(Eigen::VectorXd &f, Eigen::Ref<const Eigen::VectorXd> q, Ei
             // f = -dV/dq
             f.segment<3>(3 * T(tetraIdx, tetra_vertex_idx)) -= f.segment<3>(3 * tetra_vertex_idx);
         }
-        exit(0);
     }
     
 
