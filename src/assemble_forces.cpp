@@ -6,7 +6,7 @@ void assemble_forces(Eigen::VectorXd &f, Eigen::Ref<const Eigen::VectorXd> q, Ei
                      double C, double D) { 
         
     f.resize(q.size());
-    f = Eigen::VectorXd::Zero(q.size());
+    f.setZero();
     for (int tetraIdx = 0; tetraIdx < T.rows(); tetraIdx++) {
         Eigen::Vector12d tetra_f;
 
@@ -16,7 +16,7 @@ void assemble_forces(Eigen::VectorXd &f, Eigen::Ref<const Eigen::VectorXd> q, Ei
         for (int tetra_vertex_idx = 0; tetra_vertex_idx < 4; tetra_vertex_idx++) {
 
             // f = -dV/dq
-            f.segment<3>(3 * T(tetraIdx, tetra_vertex_idx)) -= f.segment<3>(3 * tetra_vertex_idx);
+            f.segment<3>(3 * T(tetraIdx, tetra_vertex_idx)) -= tetra_f.segment<3>(3 * tetra_vertex_idx);
         }
     }
     
