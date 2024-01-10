@@ -16,8 +16,10 @@ bool sameSide(Eigen::Ref<const Eigen::RowVector3d> p1,
 void build_skinning_matrix(Eigen::SparseMatrixd &N, Eigen::Ref<const Eigen::MatrixXd> V, Eigen::Ref<const Eigen::MatrixXi> T, 
                                                    Eigen::Ref<const Eigen::MatrixXd> V_skin) {
 
-    // assume the order of vertex in V is the order of the generalized coordinate q
-    N.resize(V_skin.rows() * 3, V.rows() * 3);
+    // according to Visualize::update_vertex_positions, the skinning matrix will be times by the vertex matrix n x 3, where
+    // each row is a vertex, and each column is a dimension
+
+    N.resize(V_skin.rows(), V.rows());
     N.setZero();
     
     // Best way to allocate an sparse matrix according https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
@@ -48,12 +50,11 @@ void build_skinning_matrix(Eigen::SparseMatrixd &N, Eigen::Ref<const Eigen::Matr
         assert(tetra_idx != -1);
         phi_linear_tetrahedron(phi, V, T.row(tetra_idx), V_skin.row(vertexIdx).transpose());
         
-        for (int dim = 0; dim < 3; dim++) {
-            tripletList.push_back(Tr(3 * vertexIdx + dim, 3 * T(tetra_idx, 0) + dim, phi(0)));
-            tripletList.push_back(Tr(3 * vertexIdx + dim, 3 * T(tetra_idx, 1) + dim, phi(1)));
-            tripletList.push_back(Tr(3 * vertexIdx + dim, 3 * T(tetra_idx, 2) + dim, phi(2)));
-            tripletList.push_back(Tr(3 * vertexIdx + dim, 3 * T(tetra_idx, 3) + dim, phi(3)));
-		}
+        tripletList.push_back(Tr(vertexIdx, T(tetra_idx, 0), phi(0)));
+        tripletList.push_back(Tr(vertexIdx, T(tetra_idx, 1), phi(1)));
+        tripletList.push_back(Tr(vertexIdx, T(tetra_idx, 2), phi(2)));
+        tripletList.push_back(Tr(vertexIdx, T(tetra_idx, 3), phi(3)));
+
 
     }
     N.setFromTriplets(tripletList.begin(), tripletList.end());
