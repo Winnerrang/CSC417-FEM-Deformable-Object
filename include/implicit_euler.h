@@ -2,6 +2,9 @@
 #include <EigenTypes.h>
 #include <newtons_method.h>
 
+#include <chrono>
+#include <iostream>
+using namespace std::chrono;
 //Input:
 //  q - generalized coordinates for the FEM system
 //  qdot - generalized velocity for the FEM system
@@ -21,25 +24,32 @@ inline void implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt,
                             const Eigen::SparseMatrixd &mass,  ENERGY &energy, FORCE &force, STIFFNESS &stiffness, 
                             Eigen::VectorXd &tmp_qdot, Eigen::VectorXd &tmp_force, Eigen::SparseMatrixd &tmp_stiffness) {
     
+    auto start = high_resolution_clock::now();
     // initial conditions
     tmp_qdot = qdot;
 
     auto grad = [&](Eigen::VectorXd dVdq_dot, Eigen::VectorXd new_q_dot) {
-        Eigen::VectorXd temp_force;
-        force(temp_force, q + dt * new_q_dot, new_q_dot);
-        dVdq_dot = mass * (new_q_dot - qdot) - dt * temp_force;
+        force(tmp_force, q + dt * new_q_dot, new_q_dot);
+        dVdq_dot = mass * (new_q_dot - qdot) - dt * tmp_force;
         };
 
     auto hessian = [&](Eigen::SparseMatrixd d2Vdq_dotdq_dot, Eigen::VectorXd new_q_dot) {
-        stiffness(d2Vdq_dotdq_dot, q + dt * new_q_dot, new_q_dot);
+        stiffness(tmp_stiffness, q + dt * new_q_dot, new_q_dot);
 
-        d2Vdq_dotdq_dot = mass - dt * dt * d2Vdq_dotdq_dot;
+        d2Vdq_dotdq_dot = mass - dt * dt * tmp_stiffness;
         };
 
 
-    newtons_method(tmp_qdot, energy, grad, hessian, 10, tmp_force, tmp_stiffness);
+    newtons_method(tmp_qdot, energy, grad, hessian, 5, tmp_force, tmp_stiffness);
 
     qdot = tmp_qdot;
     q = q + dt * qdot;
 
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    // To get the value of duration use the count()
+    // member function on the duration object
+    std::cout << duration.count() << std::endl;
+    exit(0);
 }

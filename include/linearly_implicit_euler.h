@@ -3,7 +3,8 @@
 #include<Eigen/SparseCholesky>
 #include <EigenTypes.h>
 #include <iostream>
-
+#include <chrono>
+using namespace std::chrono;
 //Input:
 //  q - generalized coordinates for the FEM system
 //  qdot - generalized velocity for the FEM system
@@ -20,7 +21,7 @@ template<typename FORCE, typename STIFFNESS>
 inline void linearly_implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, 
                             const Eigen::SparseMatrixd &mass,  FORCE &force, STIFFNESS &stiffness, 
                             Eigen::VectorXd &tmp_force, Eigen::SparseMatrixd &tmp_stiffness) {
-    
+    auto start = high_resolution_clock::now();
     force(tmp_force, q, qdot);
     stiffness(tmp_stiffness, q, qdot);
 
@@ -35,4 +36,10 @@ inline void linearly_implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, d
     qdot = solver.solve(mass * qdot + dt * tmp_force);
 
     q = q + dt * qdot;
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    // To get the value of duration use the count()
+    // member function on the duration object
+    std::cout << duration.count() << std::endl;
 }

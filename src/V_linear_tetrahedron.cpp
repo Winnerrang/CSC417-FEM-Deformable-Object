@@ -16,8 +16,7 @@ void V_linear_tetrahedron(double &energy, Eigen::Ref<const Eigen::VectorXd> q,
 
 
     // [x0 x1 x2 x3]
-    Eigen::MatrixXd q_temp;
-    q_temp.resize(3,4);
+    Eigen::Matrix34d q_temp;
     q_temp.col(0) = q.segment<3>(3*element(0));
     q_temp.col(1) = q.segment<3>(3*element(1));
     q_temp.col(2) = q.segment<3>(3*element(2));

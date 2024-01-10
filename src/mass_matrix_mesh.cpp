@@ -5,6 +5,11 @@ void mass_matrix_mesh(Eigen::SparseMatrixd &M, Eigen::Ref<const Eigen::VectorXd>
 
     M.resize(qdot.size(), qdot.size());
     M.setZero();
+
+    // Best way to allocate an sparse matrix according https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
+    typedef Eigen::Triplet<double> Tr;
+    std::vector<Tr> tripleList;
+
     for (int tetraIdx = 0; tetraIdx < T.rows(); tetraIdx++) {
         Eigen::Matrix1212d M_tetra;
         Eigen::Vector12d qdot_tetra;
@@ -21,10 +26,12 @@ void mass_matrix_mesh(Eigen::SparseMatrixd &M, Eigen::Ref<const Eigen::VectorXd>
 
                 int targetRow = tetra_indices(row / 3) * 3 + row % 3;
                 int targetCol = tetra_indices(col / 3) * 3 + col % 3;
+                tripleList.push_back(Tr(targetRow, targetCol, M_tetra(row, col)));
 				M.coeffRef(targetRow, targetCol) += M_tetra(row, col);
 			}
 		}
     }
+    M.setFromTriplets(tripleList.begin(), tripleList.end());
 
     
 
