@@ -25,7 +25,7 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 	double alpha_tolerance = 1e-8;
 	double scaling = 0.5;
 	Eigen::VectorXd d;
-	Eigen::SparseLU<Eigen::SparseMatrix<double>> solver;
+	Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> solver;
 
 	
 	while (step < maxSteps) {
@@ -39,23 +39,24 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 
 		// To get the value of duration use the count()
 		// member function on the duration object
-		std::cout << "Caclculating g" << duration.count() << std::endl;
+		//std::cout << "Caclculating g" << duration.count() << std::endl;
 
 		start = high_resolution_clock::now();
 		H(tmp_H, x0);
 		stop = high_resolution_clock::now();
 		duration = duration_cast<microseconds>(stop - start);
-		std::cout << "Caclculating H" << duration.count() << std::endl;
+		//std::cout << "Caclculating H" << duration.count() << std::endl;
 
 		start = high_resolution_clock::now();
 		solver.compute(tmp_H);
 		stop = high_resolution_clock::now();
 		duration = duration_cast<microseconds>(stop - start);
-		std::cout << "Caclculating solver" << duration.count() << std::endl;
+		//std::cout << "Caclculating solver" << duration.count() << std::endl;
 		
 		assert(solver.info() == Eigen::Success);
 		
 		if (solver.info() != Eigen::Success) {
+			std::cout << tmp_H << std::endl;
 			std::cout << "Solver failed" << std::endl;
 		}
 
@@ -63,7 +64,7 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 		d = -solver.solve(tmp_g);
 		stop = high_resolution_clock::now();
 		duration = duration_cast<microseconds>(stop - start);
-		std::cout << "Caclculating d" << duration.count() << std::endl;
+		//std::cout << "Caclculating d" << duration.count() << std::endl;
 
 
 
@@ -74,7 +75,7 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 		double newEnergy = f(x0 + alpha * d);
 		stop = high_resolution_clock::now();
 		duration = duration_cast<microseconds>(stop - start);
-		std::cout << "Caclculating newEnergy" << duration.count() << std::endl;
+		//std::cout << "Caclculating newEnergy" << duration.count() << std::endl;
 
 		start = high_resolution_clock::now();
 		//std::cout << "Energy: " << newEnergy << std::endl;
@@ -94,7 +95,7 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 
 		stop = high_resolution_clock::now();
 		duration = duration_cast<microseconds>(stop - start);
-		std::cout << "Caclculating alpha" << duration.count() << std::endl;
+		//std::cout << "Caclculating alpha" << duration.count() << std::endl;
 		x0 = x0 + alpha * d;
 		currentEnergy = newEnergy;
 
