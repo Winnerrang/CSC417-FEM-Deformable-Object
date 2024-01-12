@@ -4,12 +4,11 @@
 #include <dpsi_neo_hookean_dF.h>
 #include <quadrature_single_point.h>
 #include <iostream>
-
+#include <chrono>
 void dV_linear_tetrahedron_dq(Eigen::Vector12d &dV, Eigen::Ref<const Eigen::VectorXd> q, 
                           Eigen::Ref<const Eigen::MatrixXd> V, Eigen::Ref<const Eigen::RowVectorXi> element, double volume,
                           double C, double D) {
    
-
 
     // dphi/dX
     Eigen::Matrix43d dphidX;
@@ -23,6 +22,15 @@ void dV_linear_tetrahedron_dq(Eigen::Vector12d &dV, Eigen::Ref<const Eigen::Vect
     q_temp.col(1) = q.segment<3>(3 * element(1));
     q_temp.col(2) = q.segment<3>(3 * element(2));
     q_temp.col(3) = q.segment<3>(3 * element(3));
+
+    Eigen::Matrix3d vol;
+    vol.col(0) = q_temp.col(1) - q_temp.col(0);
+    vol.col(1) = q_temp.col(2) - q_temp.col(0);
+    vol.col(2) = q_temp.col(3) - q_temp.col(0);
+    
+    // we are integrating over the volume of the tetrahedron in real space not reference space
+    double realVol = vol.determinant() / 6.0;
+
 
     // Deformation Gradient
     Eigen::Matrix3d F = q_temp * dphidX;
@@ -41,6 +49,7 @@ void dV_linear_tetrahedron_dq(Eigen::Vector12d &dV, Eigen::Ref<const Eigen::Vect
     }
     
 
+
    auto neohookean_linear_tet = [&](Eigen::Vector12d &dV, Eigen::Ref<const Eigen::VectorXd>q, Eigen::Ref<const Eigen::RowVectorXi> element, Eigen::Ref<const Eigen::Vector3d> X) {
         	   
 	   Eigen::Vector9d dPdF;
@@ -48,6 +57,6 @@ void dV_linear_tetrahedron_dq(Eigen::Vector12d &dV, Eigen::Ref<const Eigen::Vect
 	   dV = Bj.transpose() * dPdF;
     };
 
-    quadrature_single_point(dV, q, element, volume, neohookean_linear_tet);  
-    
+    //quadrature_single_point(dV, q, element, std::abs(realVol), neohookean_linear_tet);
+   quadrature_single_point(dV, q, element, volume, neohookean_linear_tet);
 }
