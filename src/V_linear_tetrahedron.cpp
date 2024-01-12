@@ -21,6 +21,14 @@ void V_linear_tetrahedron(double &energy, Eigen::Ref<const Eigen::VectorXd> q,
     q_temp.col(1) = q.segment<3>(3*element(1));
     q_temp.col(2) = q.segment<3>(3*element(2));
     q_temp.col(3) = q.segment<3>(3*element(3));
+    
+    Eigen::Matrix3d vol;
+    vol.col(0) = q_temp.col(1) - q_temp.col(0);
+    vol.col(1) = q_temp.col(2) - q_temp.col(0);
+    vol.col(2) = q_temp.col(3) - q_temp.col(0);
+
+    // we are integrating over the volume of the tetrahedron in real space not reference space
+    double realVol = vol.determinant() / 6.0;
 
     // Deformation Gradient
     Eigen::Matrix3d F = q_temp * dphidX;
@@ -30,6 +38,6 @@ void V_linear_tetrahedron(double &energy, Eigen::Ref<const Eigen::VectorXd> q,
         psi_neo_hookean(e, F, C, D);
     };
 
-    quadrature_single_point(energy, q, element, volume, neohookean_linear_tet);  
+    quadrature_single_point(energy, q, element, std::abs(realVol), neohookean_linear_tet);
     
 }

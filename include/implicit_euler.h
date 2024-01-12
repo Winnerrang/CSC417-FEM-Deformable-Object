@@ -50,5 +50,5 @@ inline void implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt,
 
     // To get the value of duration use the count()
     // member function on the duration object
-    std::cout << duration.count() << std::endl;
+    std::cout << "FPS: " << 1000000.0 / ((double)duration.count()) << std::endl;
 }

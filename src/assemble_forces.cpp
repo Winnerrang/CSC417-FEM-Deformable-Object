@@ -1,10 +1,12 @@
 #include <assemble_forces.h>
 #include <iostream>
 #include <dV_linear_tetrahedron_dq.h>
+#include <chrono>
 void assemble_forces(Eigen::VectorXd &f, Eigen::Ref<const Eigen::VectorXd> q, Eigen::Ref<const Eigen::MatrixXd> qdot, 
                      Eigen::Ref<const Eigen::MatrixXd> V, Eigen::Ref<const Eigen::MatrixXi> T, Eigen::Ref<const Eigen::VectorXd> v0,
                      double C, double D) { 
-        
+    
+
     f.resize(q.size());
     f.setZero();
     for (int tetraIdx = 0; tetraIdx < T.rows(); tetraIdx++) {
@@ -19,6 +21,4 @@ void assemble_forces(Eigen::VectorXd &f, Eigen::Ref<const Eigen::VectorXd> q, Ei
             f.segment<3>(3 * T(tetraIdx, tetra_vertex_idx)) -= tetra_f.segment<3>(3 * tetra_vertex_idx);
         }
     }
-    
-
 };
