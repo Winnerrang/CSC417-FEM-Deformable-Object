@@ -21,7 +21,7 @@ void build_skinning_matrix(Eigen::SparseMatrixd &N, Eigen::Ref<const Eigen::Matr
 
     N.resize(V_skin.rows(), V.rows());
     N.setZero();
-
+    return;
     // Best way to allocate an sparse matrix according https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
     typedef Eigen::Triplet<double> Tr;
     std::vector<Tr> tripletList;

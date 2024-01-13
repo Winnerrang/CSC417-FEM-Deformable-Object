@@ -57,6 +57,6 @@ void dV_linear_tetrahedron_dq(Eigen::Vector12d &dV, Eigen::Ref<const Eigen::Vect
 	   dV = Bj.transpose() * dPdF;
     };
 
-    //quadrature_single_point(dV, q, element, std::abs(realVol), neohookean_linear_tet);
-   quadrature_single_point(dV, q, element, volume, neohookean_linear_tet);
+    quadrature_single_point(dV, q, element, std::abs(realVol), neohookean_linear_tet);
+   //quadrature_single_point(dV, q, element, volume, neohookean_linear_tet);
 }

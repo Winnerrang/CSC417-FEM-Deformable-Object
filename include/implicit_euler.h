@@ -30,12 +30,14 @@ inline void implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt,
 
     auto grad = [&](Eigen::VectorXd dVdq_dot, Eigen::VectorXd new_q_dot) {
         force(tmp_force, q + dt * new_q_dot, new_q_dot);
+        dVdq_dot.setZero();
         dVdq_dot = mass * (new_q_dot - qdot) - dt * tmp_force;
         };
 
     auto hessian = [&](Eigen::SparseMatrixd d2Vdq_dotdq_dot, Eigen::VectorXd new_q_dot) {
         stiffness(tmp_stiffness, q + dt * new_q_dot, new_q_dot);
 
+        d2Vdq_dotdq_dot.setZero();
         d2Vdq_dotdq_dot = mass - dt * dt * tmp_stiffness;
         };
 
@@ -44,7 +46,6 @@ inline void implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt,
 
     qdot = tmp_qdot;
     q = q + dt * qdot;
-
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
 
