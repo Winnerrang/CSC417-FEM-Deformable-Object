@@ -55,7 +55,7 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 
 		H(tmp_H, x0);
 
-		
+		tmp_H.makeCompressed();
 
 		solver.compute(tmp_H);
 
@@ -97,11 +97,11 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 		currentEnergy = newEnergy;
 	}
 
-	g(tmp_g, x0);
+	// g(tmp_g, x0);
 	
-	std::cout << "I am tired.... Original Energy: " << originalEnergy
-								<< " NewEnergy: " << newEnergy 
-								<< "gradient norm: " << tmp_g.norm()<< std::endl;
+	// std::cout << "I am tired.... Original Energy: " << originalEnergy
+	// 							<< " NewEnergy: " << newEnergy 
+	// 							<< "gradient norm: " << tmp_g.norm()<< std::endl;
 	/*if (tmp_g.norm() > 10e-5){
 		std::cout << "Keep Going" << std::endl;
 		continue;

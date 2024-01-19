@@ -5,6 +5,7 @@
 #include <chrono>
 #include <iostream>
 using namespace std::chrono;
+typedef Eigen::Triplet<double> Tr;
 //Input:
 //  q - generalized coordinates for the FEM system
 //  qdot - generalized velocity for the FEM system
@@ -28,7 +29,10 @@ inline void implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt,
     // initial conditions
     tmp_qdot = qdot;
 
-    auto grad = [&](Eigen::VectorXd dVdq_dot, Eigen::VectorXd new_q_dot) {
+    tmp_force.resize(q.size());
+    tmp_stiffness.resize(q.size(), q.size());
+
+    auto grad = [&](Eigen::VectorXd &dVdq_dot, Eigen::VectorXd &new_q_dot) {
         force(tmp_force, q + dt * new_q_dot, new_q_dot);
 
         
@@ -38,11 +42,18 @@ inline void implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt,
 
         };
 
-    auto hessian = [&](Eigen::SparseMatrixd d2Vdq_dotdq_dot, Eigen::VectorXd new_q_dot) {
+    auto hessian = [&](Eigen::SparseMatrixd &d2Vdq_dotdq_dot, Eigen::VectorXd &new_q_dot) {
         stiffness(tmp_stiffness, q + dt * new_q_dot, new_q_dot);
 
         d2Vdq_dotdq_dot.setZero();
         d2Vdq_dotdq_dot = mass - dt * dt * tmp_stiffness;
+        // std::vector<Tr> tripletList;
+        // d2Vdq_dotdq_dot.setZero();
+        // for (int i = 0; i < q.size(); i++){
+        //     tripletList.push_back(Tr(i, i, 1.0));
+        // }
+
+        // d2Vdq_dotdq_dot.setFromTriplets(tripletList.begin(), tripletList.end());
         };
 
 
