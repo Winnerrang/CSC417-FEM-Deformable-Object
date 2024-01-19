@@ -102,10 +102,10 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 	std::cout << "I am tired.... Original Energy: " << originalEnergy
 								<< " NewEnergy: " << newEnergy 
 								<< "gradient norm: " << tmp_g.norm()<< std::endl;
-	if (tmp_g.norm() > 10e-5){
+	/*if (tmp_g.norm() > 10e-5){
 		std::cout << "Keep Going" << std::endl;
 		continue;
-	} 
+	} */
 	return currentEnergy;
 	}
 }

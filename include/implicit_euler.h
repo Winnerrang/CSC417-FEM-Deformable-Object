@@ -30,8 +30,12 @@ inline void implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt,
 
     auto grad = [&](Eigen::VectorXd dVdq_dot, Eigen::VectorXd new_q_dot) {
         force(tmp_force, q + dt * new_q_dot, new_q_dot);
+
+        
         dVdq_dot.setZero();
         dVdq_dot = mass * (new_q_dot - qdot) - dt * tmp_force;
+
+
         };
 
     auto hessian = [&](Eigen::SparseMatrixd d2Vdq_dotdq_dot, Eigen::VectorXd new_q_dot) {
