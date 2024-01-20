@@ -49,14 +49,14 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 	Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> solver;
 	double alpha;
 
-	while(true){
 	for (int i = 0; i < maxSteps; i++){
 		g(tmp_g, x0);
 
 		H(tmp_H, x0);
 
-		tmp_H.makeCompressed();
+		//tmp_H.makeCompressed();
 
+		
 		solver.compute(tmp_H);
 
 		if (solver.info() != Eigen::Success)
@@ -67,29 +67,29 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 
 		d = -solver.solve(tmp_g);
 		
-		if (tmp_g.norm() < 1e-8){
-			std::cout << "Converge!!!\n"; 
-			return currentEnergy;
-		}
-		// if (d.lpNorm<Eigen::Infinity>() < 1e-3){
-		// 	std::cout << "Converge!!!\n"; 
-		// 	return currentEnergy;
-		// }
+		//if (tmp_g.norm() < 1e-8){
+		//	//std::cout << i << std::endl;
+		//	//std::cout << "Converge!!!\n"; 
+		//	return currentEnergy;
+		//}
+		 if (d.lpNorm<Eigen::Infinity>() < 1e-3){
+		 	std::cout << "Converge!!!\n"; 
+		 	return currentEnergy;
+		 }
 
 		//line search
 		alpha = 1;
 
 		while (newEnergy >= currentEnergy){
-			// if (alpha < alpha_tolerance){
-			// 	std::cout << "No Choice....\n"; 
-			// 	return currentEnergy;
-			// } 
+			 if (alpha < alpha_tolerance){
+			 	std::cout << "No Choice....\n"; 
+			 	return currentEnergy;
+			 } 
 			
 			newEnergy = f(x0 + alpha * d);
 
 			if (newEnergy >= currentEnergy) alpha *= scaling;
 
-			
 		}
 
 		x0 = x0 + alpha * d;
@@ -107,5 +107,4 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 		continue;
 	} */
 	return currentEnergy;
-	}
 }

@@ -33,20 +33,22 @@ inline void implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt,
     tmp_stiffness.resize(q.size(), q.size());
 
     auto grad = [&](Eigen::VectorXd &dVdq_dot, Eigen::VectorXd &new_q_dot) {
+        //std::cout << "calculating gradient" << std::endl;
         force(tmp_force, q + dt * new_q_dot, new_q_dot);
 
-        
-        dVdq_dot.setZero();
+        //std::cout << "Finish Calculating force" << std::endl;
         dVdq_dot = mass * (new_q_dot - qdot) - dt * tmp_force;
-
+        
+        //std::cout << "gradient calculated" << std::endl;
 
         };
 
     auto hessian = [&](Eigen::SparseMatrixd &d2Vdq_dotdq_dot, Eigen::VectorXd &new_q_dot) {
+        //std::cout << "calculating hessian" << std::endl;
         stiffness(tmp_stiffness, q + dt * new_q_dot, new_q_dot);
 
-        d2Vdq_dotdq_dot.setZero();
         d2Vdq_dotdq_dot = mass - dt * dt * tmp_stiffness;
+        //std::cout << "hessian calculated" << std::endl;
         // std::vector<Tr> tripletList;
         // d2Vdq_dotdq_dot.setZero();
         // for (int i = 0; i < q.size(); i++){
