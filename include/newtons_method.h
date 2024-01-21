@@ -56,8 +56,9 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 
 		//tmp_H.makeCompressed();
 
-		
+		//std::cout << "compute\n";
 		solver.compute(tmp_H);
+		//std::cout << "finish compute\n";
 
 		if (solver.info() != Eigen::Success)
 		{
@@ -65,36 +66,54 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 			exit(0);
 		}
 
+		//std::cout << "solve\n";
 		d = -solver.solve(tmp_g);
+
+		if (d.dot(tmp_g) > 0) {
+			std::cout << "No!!!\n";
+			exit(0);
+		}
+		//std::cout << "finish solve\n";
 		
+
 		//if (tmp_g.norm() < 1e-8){
 		//	//std::cout << i << std::endl;
 		//	//std::cout << "Converge!!!\n"; 
 		//	return currentEnergy;
 		//}
+
+		//std::cout << "checking\n";
 		 if (d.lpNorm<Eigen::Infinity>() < 1e-3){
-		 	std::cout << "Converge!!!\n"; 
+		 	std::cout << "Converge!!! " << currentEnergy << std::endl; 
 		 	return currentEnergy;
 		 }
 
 		//line search
 		alpha = 1;
 
+		//std::cout << "line search\n";
 		while (newEnergy >= currentEnergy){
 			 if (alpha < alpha_tolerance){
-			 	std::cout << "No Choice....\n"; 
+			 	std::cout << "No Choice...." << currentEnergy << std::endl; ;
 			 	return currentEnergy;
 			 } 
 			
 			newEnergy = f(x0 + alpha * d);
 
-			if (newEnergy >= currentEnergy) alpha *= scaling;
+			if (newEnergy >= currentEnergy + 10e-8 * d.dot(tmp_g)) alpha *= scaling;
 
 		}
 
 		x0 = x0 + alpha * d;
 
 		currentEnergy = newEnergy;
+		//std::cout << "finsh\n";
+		std::cout << "Energy: " << currentEnergy << "Gradient Norm " << d.lpNorm<Eigen::Infinity>() << std::endl;
+		if (d.lpNorm<Eigen::Infinity>() > 100) {
+			std::cout << tmp_g << std::endl;
+			std::cout << "Hessian\n" << d << std::endl;
+			exit(0);
+		}
 	}
 
 	// g(tmp_g, x0);
@@ -106,5 +125,9 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 		std::cout << "Keep Going" << std::endl;
 		continue;
 	} */
+	std::cout << "I am tired.... Energy: " << currentEnergy << std::endl;
+	/*if (currentEnergy > 0.2) {
+		std::cout << x0 << std::endl;
+	}*/
 	return currentEnergy;
 }

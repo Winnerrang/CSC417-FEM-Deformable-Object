@@ -400,7 +400,7 @@ bool Visualize::plot_phase_space(const char *label, ImVec2 q_bounds, ImVec2 q_do
 
             g_selected_obj = 0;
             g_mouse_dragging = true; 
-            
+
         }
         
         return false;

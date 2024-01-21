@@ -241,7 +241,7 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
     for(unsigned int pickedi = 0; pickedi < Visualize::picked_vertices().size(); pickedi++) {   
         spring_points.push_back(std::make_pair((P.transpose()*q+x0).segment<3>(3*Visualize::picked_vertices()[pickedi]) + Visualize::mouse_drag_world() + Eigen::Vector3d::Constant(1e-6),3*Visualize::picked_vertices()[pickedi]));
     }
-
+    //std::cout << "ehhhhhhhhhhhhhhhhhhhhhhhhhhh\n";
     auto energy = [&](Eigen::Ref<const Eigen::VectorXd> qdot_1)->double {
         double E = 0;
         Eigen::VectorXd newq = P.transpose()*(q+dt*qdot_1)+x0;
@@ -267,14 +267,32 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
 
     auto force = [&](Eigen::VectorXd &f, Eigen::Ref<const Eigen::VectorXd> q2, Eigen::Ref<const Eigen::VectorXd> qdot2) { 
         
+        //std::cout << "force" << std::endl;
         assemble_forces(f, P.transpose()*q2+x0, P.transpose()*qdot2, V, T, v0, C,D);
 
+        //std::cout << "A" << std::endl;
         for(unsigned int pickedi = 0; pickedi < spring_points.size(); pickedi++) {
+            /*std::cout << "spring_points[pickedi].first " << spring_points[pickedi].first << std::endl;
+            std::cout << "spring_points[pickedi].second " << spring_points[pickedi].second << std::endl;
+            std::cout << "size " << (P.transpose() * q2 + x0).size() << std::endl;*/
             dV_spring_particle_particle_dq(dV_mouse, spring_points[pickedi].first, (P.transpose()*q2+x0).segment<3>(spring_points[pickedi].second), 0.0, k_selected_now);
-            f.segment<3>(3*Visualize::picked_vertices()[pickedi]) -= dV_mouse.segment<3>(3);
+            //std::cout << f.size() << "\n";
+            //std::cout << pickedi << "\n";
+
+            /*for (auto ver : Visualize::picked_vertices()) {
+				std::cout << ver << "\n";
+			}*/
+
+            //std::cout << "ohhhhhhhhhhhhhhhhhhhhhhhhhhh\n";
+
+            //std::cout << spring_points[pickedi].second << "\n";
+            //f.segment<3>(3*Visualize::picked_vertices()[pickedi]) -= dV_mouse.segment<3>(3);
+            f.segment<3>(spring_points[pickedi].second) -= dV_mouse.segment<3>(3);
         }
 
+        //std::cout << "b" << std::endl;
         f = P*f; 
+        //std::cout << "force end" << std::endl;
     };
 
     //assemble stiffness matrix,

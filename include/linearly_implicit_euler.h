@@ -22,7 +22,10 @@ inline void linearly_implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, d
                             const Eigen::SparseMatrixd &mass,  FORCE &force, STIFFNESS &stiffness, 
                             Eigen::VectorXd &tmp_force, Eigen::SparseMatrixd &tmp_stiffness) {
     auto start = high_resolution_clock::now();
+    //std::cout << "Implicit Euler" << std::endl;
     force(tmp_force, q, qdot);
+
+    //std::cout << "force" << std::endl;
     stiffness(tmp_stiffness, q, qdot);
 
     Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> solver;
@@ -31,11 +34,11 @@ inline void linearly_implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, d
     // solve the system (M-dt^2 K) qdot^(n+1) = M * qdot^n + dt f(q^n)
 
     solver.compute(mass - dt * dt * tmp_stiffness);
-
+    //std::cout << "comppute" << std::endl;
     assert(solver.info() == Eigen::Success);
 
     qdot = solver.solve(mass * qdot + dt * tmp_force);
-
+    //std::cout << "solve" << std::endl;
     q = q + dt * qdot;
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);

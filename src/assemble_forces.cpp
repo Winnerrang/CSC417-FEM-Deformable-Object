@@ -13,7 +13,9 @@ void assemble_forces(Eigen::VectorXd &f, Eigen::Ref<const Eigen::VectorXd> q, Ei
     for (int tetraIdx = 0; tetraIdx < T.rows(); tetraIdx++) {
         Eigen::Vector12d tetra_f;
 
+        //std::cout << "enter\n";
         dV_linear_tetrahedron_dq(tetra_f, q, V, T.row(tetraIdx), v0(tetraIdx), C, D);
+        //std::cout << "finish\n";
         //std::cout << "tetra_f:" << tetra_f << std::endl;
 
         for (int tetra_vertex_idx = 0; tetra_vertex_idx < 4; tetra_vertex_idx++) {
@@ -27,5 +29,9 @@ void assemble_forces(Eigen::VectorXd &f, Eigen::Ref<const Eigen::VectorXd> q, Ei
             // f = -dV/dq
             f.segment<3>(3 * T(tetraIdx, tetra_vertex_idx)) -= tetra_f.segment<3>(3 * tetra_vertex_idx);
         }
+
+        //std::cout << "filling\n";
     }
+
+    //std::cout << "finish everything\n";
 };

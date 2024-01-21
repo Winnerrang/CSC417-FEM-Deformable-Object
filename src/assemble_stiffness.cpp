@@ -50,7 +50,7 @@ void split_work(int startIdx, int endIdx, std::vector<Tr>* tripletList, Eigen::R
 void assemble_stiffness(Eigen::SparseMatrixd &K, Eigen::Ref<const Eigen::VectorXd> q, Eigen::Ref<const Eigen::VectorXd> qdot, 
                      Eigen::Ref<const Eigen::MatrixXd> V, Eigen::Ref<const Eigen::MatrixXi> T, Eigen::Ref<const Eigen::VectorXd> v0, 
                      double C, double D) { 
-        
+    //std::cout << "stiffnew" << std::endl;
     K.resize(q.size(), q.size());
 	K.setZero();
 
@@ -67,15 +67,7 @@ void assemble_stiffness(Eigen::SparseMatrixd &K, Eigen::Ref<const Eigen::VectorX
 	threads.push_back(std::thread(split_work, delta * (numThread - 1), T.rows(), &tripletList, q, qdot, V, T, v0, C, D));
 
 	for (auto& th : threads) th.join();
-	std::thread thread_object(split_work, 0, delta, &tripletList, q, qdot, V, T, v0, C, D);
-	std::thread thread_object2(split_work, delta, delta * 2, &tripletList, q, qdot, V, T, v0, C, D);
-	std::thread thread_object3(split_work, delta * 2, delta * 3, &tripletList, q, qdot, V, T, v0, C, D);
-	std::thread thread_object4(split_work, delta * 3, T.rows(), &tripletList, q, qdot, V, T, v0, C, D);
-	thread_object.join();
-	thread_object2.join();
-	thread_object3.join();
-	thread_object4.join();
-
+	//std::cout << "stiffnewfinish" << std::endl;
  //   for (int tetraIdx = 0; tetraIdx < T.rows(); tetraIdx++) {
  //       Eigen::Matrix1212d d2Vdq2;
 
