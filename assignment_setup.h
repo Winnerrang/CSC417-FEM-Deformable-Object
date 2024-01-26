@@ -286,8 +286,8 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
             //std::cout << "ohhhhhhhhhhhhhhhhhhhhhhhhhhh\n";
 
             //std::cout << spring_points[pickedi].second << "\n";
-            //f.segment<3>(3*Visualize::picked_vertices()[pickedi]) -= dV_mouse.segment<3>(3);
-            f.segment<3>(spring_points[pickedi].second) -= dV_mouse.segment<3>(3);
+            f.segment<3>(3*Visualize::picked_vertices()[pickedi]) -= dV_mouse.segment<3>(3);
+            //f.segment<3>(spring_points[pickedi].second) -= dV_mouse.segment<3>(3);
         }
 
         //std::cout << "b" << std::endl;

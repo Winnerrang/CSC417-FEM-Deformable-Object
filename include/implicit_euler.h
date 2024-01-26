@@ -35,35 +35,32 @@ inline void implicit_euler(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt,
     //std::cout << "2" << std::endl;
     tmp_stiffness.resize(q.size(), q.size());
     //std::cout << "world" << std::endl;
-    auto grad = [&](Eigen::VectorXd &dVdq_dot, Eigen::VectorXd &new_q_dot) {
-        //std::cout << "calculating gradient" << std::endl;
-        force(tmp_force, q + dt * new_q_dot, new_q_dot);
+    auto grad = [&](Eigen::VectorXd &dVdq_dot, Eigen::Ref<const Eigen::VectorXd> new_q_dot) {
 
-        //std::cout << "Finish Calculating force" << std::endl;
-        dVdq_dot = mass * (new_q_dot - qdot) - dt * tmp_force;
-        
-        //std::cout << "gradient calculated" << std::endl;
+        Eigen::VectorXd gen_force;
+        force(gen_force, q + dt * new_q_dot, new_q_dot);
+        dVdq_dot = mass * (new_q_dot - qdot) - dt * gen_force;
 
         };
 
-    auto hessian = [&](Eigen::SparseMatrixd &d2Vdq_dotdq_dot, Eigen::VectorXd &new_q_dot) {
+    auto hessian = [&](Eigen::SparseMatrixd &d2Vdq_dotdq_dot, Eigen::Ref<const Eigen::VectorXd> new_q_dot) {
         //std::cout << "calculating hessian" << std::endl;
-        stiffness(tmp_stiffness, q + dt * new_q_dot, new_q_dot);
 
-        d2Vdq_dotdq_dot = mass - dt * dt * tmp_stiffness;
-        /*std::cout << "hessian calculated" << std::endl;
-         std::vector<Tr> tripletList;
-         d2Vdq_dotdq_dot.setZero();
-         for (int i = 0; i < q.size(); i++){
-             tripletList.push_back(Tr(i, i, 1.0));
-         }
-
-        d2Vdq_dotdq_dot.setFromTriplets(tripletList.begin(), tripletList.end());*/
+        
+        Eigen::SparseMatrixd stiffness_matrix;
+        Eigen::VectorXd v = new_q_dot;
+        stiffness(stiffness_matrix, q + dt * v, v);
+        d2Vdq_dotdq_dot = mass - dt * dt * stiffness_matrix;
+        
         };
 
     //std::cout << "3" << std::endl;
-    newtons_method(tmp_qdot, energy, grad, hessian, 10, tmp_force, tmp_stiffness);
+    //newtons_method(tmp_qdot, energy, grad, hessian, 5, tmp_force, tmp_stiffness);
+    newtons_method(tmp_qdot, energy, grad, hessian, 5, tmp_force, tmp_stiffness);
     //std::cout << "4" << std::endl;
+
+    /*assert(qdot_temp == qdot);
+    assert(q_temp == q);*/
     qdot = tmp_qdot;
     q = q + dt * qdot;
     //std::cout << "5" << std::endl;
