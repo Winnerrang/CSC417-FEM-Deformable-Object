@@ -249,19 +249,42 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
         // potential energy for each tetrahedron
         for(unsigned int ei=0; ei<T.rows(); ++ei) {
             
-            V_linear_tetrahedron(V_ele,newq , V, T.row(ei), v0(ei), C, D);
+            V_linear_tetrahedron(V_ele,newq , V, T.row(ei), v0(ei), C, D, false);
+            double before = E;
             E += V_ele;
+
+            if (isnan(E)) {
+                std::cout << "V: " << ei << std::endl;
+                std::cout << before << std::endl;
+                std::cout << V_ele << std::endl;
+
+                for (int i = 0; i < 4; i++) {
+                    std::cout << "q " << i << ": " << q.segment<3>(T(ei, i)) << std::endl;
+                }
+
+                for (int i = 0; i < 4; i++) {
+					std::cout << "q_hat " << i << ": " << V.row(i) << std::endl;
+				}
+                V_linear_tetrahedron(V_ele, newq, V, T.row(ei), v0(ei), C, D, true);
+                exit(0);
+            }
         }
 
         // potential energy for each spring created when dragging
         for(unsigned int pickedi = 0; pickedi < spring_points.size(); pickedi++) {   
             V_spring_particle_particle(V_ele, spring_points[pickedi].first, newq.segment<3>(spring_points[pickedi].second), 0.0, k_selected_now);
             E += V_ele;
+            if (isnan(E)) {
+                std::cout << "V: " << pickedi << std::endl;
+                exit(0);
+            }
         }
 
         // kinetic energy
         E += 0.5*(qdot_1 - qdot).transpose()*M*(qdot_1 - qdot);
-
+        if (isnan(E)) {
+            std::cout << "T: " << std::endl;
+        }
         return E;
     };
 
@@ -286,8 +309,8 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
             //std::cout << "ohhhhhhhhhhhhhhhhhhhhhhhhhhh\n";
 
             //std::cout << spring_points[pickedi].second << "\n";
-            f.segment<3>(3*Visualize::picked_vertices()[pickedi]) -= dV_mouse.segment<3>(3);
-            //f.segment<3>(spring_points[pickedi].second) -= dV_mouse.segment<3>(3);
+            //f.segment<3>(3*Visualize::picked_vertices()[pickedi]) -= dV_mouse.segment<3>(3);
+            f.segment<3>(spring_points[pickedi].second) -= dV_mouse.segment<3>(3);
         }
 
         //std::cout << "b" << std::endl;
@@ -315,7 +338,7 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
         T_linear_tetrahedron(T_ele, P.transpose()*qdot, T.row(ei), density, v0(ei));
         KE += T_ele;
 
-        V_linear_tetrahedron(V_ele, P.transpose()*q+x0, V, T.row(ei), v0(ei), C, D);
+        V_linear_tetrahedron(V_ele, P.transpose()*q+x0, V, T.row(ei), v0(ei), C, D, false);
         PE += V_ele;
     }
     

@@ -55,11 +55,16 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 		//std::cout << "Current Energy: " << currentEnergy << std::endl;
 
 		Eigen::VectorXd x_temp = x0;
+		tmp_g.setZero();
 		g(tmp_g, x_temp);
-
+		if (x_temp != x0) {
+			std::cout << x_temp.norm() << std::endl << x0.norm() << std::endl;
+		}
 		assert(x_temp == x0);
 
+		
 		x_temp = x0;
+		tmp_H.setZero();
 		H(tmp_H, x0);
 		assert(x_temp == x0);
 
@@ -103,7 +108,7 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 		alpha = 1;
 
 		//std::cout << "line search\n";
-		while (newEnergy >= currentEnergy){
+		while (newEnergy >= currentEnergy + 10e-8 * d.dot(tmp_g)){
 			 if (alpha < alpha_tolerance){
 			 	std::cout << "No Choice...." << currentEnergy << std::endl; ;
 			 	return currentEnergy;
@@ -115,7 +120,15 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 
 		}
 
+		if (isnan(newEnergy)) {
+			//std::cout << x0 + alpha * d << std::endl;
+			exit(0);
+		}
+		std::cout << "x0: " << x0.norm() << std::endl;
+		std::cout << "alpha: " << alpha << std::endl;
 		x0 = x0 + alpha * d;
+		std::cout << "x0: " << x0.norm() << std::endl;
+		
 
 		currentEnergy = newEnergy;
 		std::cout << "finsh\n";
@@ -123,6 +136,7 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 		if (d.lpNorm<Eigen::Infinity>() > 500) {
 			//std::cout << tmp_g << std::endl;
 			//std::cout << "Hessian\n" << d << std::endl;
+			
 			std::this_thread::sleep_for(std::chrono::seconds(100));
 		}
 	}

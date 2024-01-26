@@ -3,10 +3,11 @@
 #include <dphi_linear_tetrahedron_dX.h>
 #include <psi_neo_hookean.h>
 #include <quadrature_single_point.h>
+#include <iostream>
 
 void V_linear_tetrahedron(double &energy, Eigen::Ref<const Eigen::VectorXd> q, 
                           Eigen::Ref<const Eigen::MatrixXd> V, Eigen::Ref<const Eigen::RowVectorXi> element, double volume,
-                          double C, double D) {
+                          double C, double D, bool debug=false) {
 
     
     
@@ -14,7 +15,7 @@ void V_linear_tetrahedron(double &energy, Eigen::Ref<const Eigen::VectorXd> q,
     Eigen::Matrix43d dphidX;
     dphi_linear_tetrahedron_dX(dphidX, V, element, Eigen::Vector3d::Zero());
 
-
+    if (debug) std::cout << "dphidX: " << std::endl << dphidX << std::endl;
     // [x0 x1 x2 x3]
     Eigen::Matrix34d q_temp;
     q_temp.col(0) = q.segment<3>(3*element(0));
@@ -30,12 +31,17 @@ void V_linear_tetrahedron(double &energy, Eigen::Ref<const Eigen::VectorXd> q,
     // we are integrating over the volume of the tetrahedron in real space not reference space
     double realVol = vol.determinant() / 6.0;
 
+	if (debug) std::cout << "realVol: " << realVol << std::endl;
     // Deformation Gradient
     Eigen::Matrix3d F = q_temp * dphidX;
-
+    if (debug) {
+        std::cout << "F: " << std::endl << F << std::endl;
+        std::cout << "F.determinant(): " << F.determinant() << std::endl;
+    }
     auto neohookean_linear_tet = [&](double &e, Eigen::Ref<const Eigen::VectorXd>q, Eigen::Ref<const Eigen::RowVectorXi> element, Eigen::Ref<const Eigen::Vector3d> X) {
         
-        psi_neo_hookean(e, F, C, D);
+        psi_neo_hookean(e, F, C, D, debug);
+        if (debug) std::cout << "psi: " << e << std::endl;
     };
 
     quadrature_single_point(energy, q, element, std::abs(realVol), neohookean_linear_tet);
