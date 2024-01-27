@@ -17,28 +17,15 @@ using namespace std::chrono;
 template<typename Objective, typename Jacobian, typename Hessian>
 double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H, unsigned int maxSteps, Eigen::VectorXd &tmp_g, Eigen::SparseMatrixd &tmp_H) {
    
-// 	double alpha = 1.0;
-// 	for (int i = 0; i < maxSteps; i++) {
-// 		tmp_g.setZero();
-// 		g(tmp_g, x0);
-// 		if (tmp_g.norm() < 1e-8) return tmp_g.norm();
+	double originalEnergy; 
+	double time_scale = 1.0;
+	
+	do {
+		originalEnergy = f(x0 * time_scale);
+		if (isnan(originalEnergy)) time_scale *= 0.5;
+	} while (isnan(originalEnergy));
 
-// 		tmp_H.setZero();
-// 		H(tmp_H, x0);
-// 		Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> solver;
-// 		solver.compute(tmp_H);
-
-// 		Eigen::VectorXd dx = solver.solve(tmp_g);
-
-// 		alpha = 1.0;
-// 		while((f(x0 - alpha*dx) > f(x0) - 1e-8*alpha*tmp_g.dot(dx))&&(alpha>1e-12))
-// 			   alpha *= 0.5;
-
-// 		x0 -= alpha*dx;
-//    }
-//    return tmp_g.norm();
-
-	double originalEnergy = f(x0);
+	x0 = x0 * time_scale;
 	std::cout << "Original Energy: " << originalEnergy << std::endl;
 	double currentEnergy = originalEnergy;
 	double newEnergy = currentEnergy;
@@ -108,7 +95,7 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 		alpha = 1;
 
 		//std::cout << "line search\n";
-		while (newEnergy >= currentEnergy + 10e-8 * d.dot(tmp_g)){
+		while (isnan(newEnergy) || newEnergy >= currentEnergy + 10e-8 * d.dot(tmp_g)){
 			 if (alpha < alpha_tolerance){
 			 	std::cout << "No Choice...." << currentEnergy << std::endl; ;
 			 	return currentEnergy;
@@ -116,7 +103,7 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 			
 			newEnergy = f(x0 + alpha * d);
 
-			if (newEnergy >= currentEnergy + 10e-8 * d.dot(tmp_g)) alpha *= scaling;
+			if (isnan(newEnergy) || newEnergy >= currentEnergy + 10e-8 * d.dot(tmp_g)) alpha *= scaling;
 
 		}
 
@@ -124,21 +111,22 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 			//std::cout << x0 + alpha * d << std::endl;
 			exit(0);
 		}
-		std::cout << "x0: " << x0.norm() << std::endl;
+		/*std::cout << "x0: " << x0.norm() << std::endl;
 		std::cout << "alpha: " << alpha << std::endl;
 		x0 = x0 + alpha * d;
-		std::cout << "x0: " << x0.norm() << std::endl;
-		
+		std::cout << "x0: " << x0.norm() << std::endl;*/
+		x0 = x0 + alpha * d;
 
 		currentEnergy = newEnergy;
-		std::cout << "finsh\n";
-		std::cout << "Energy: " << currentEnergy << "Gradient Norm " << d.lpNorm<Eigen::Infinity>() << std::endl;
-		if (d.lpNorm<Eigen::Infinity>() > 500) {
-			//std::cout << tmp_g << std::endl;
-			//std::cout << "Hessian\n" << d << std::endl;
-			
-			std::this_thread::sleep_for(std::chrono::seconds(100));
-		}
+		//std::cout << "finsh\n";
+		std::cout << "Energy: " << currentEnergy << " Gradient Norm " << d.lpNorm<Eigen::Infinity>() <<
+			" velocity norm " << x0.norm() << std::endl;
+		//if (d.lpNorm<Eigen::Infinity>() > 500) {
+		//	//std::cout << tmp_g << std::endl;
+		//	//std::cout << "Hessian\n" << d << std::endl;
+		//	
+		//	std::this_thread::sleep_for(std::chrono::seconds(100));
+		//}
 	}
 
 	// g(tmp_g, x0);

@@ -253,7 +253,7 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
             double before = E;
             E += V_ele;
 
-            if (isnan(E)) {
+            /*if (isnan(E)) {
                 std::cout << "V: " << ei << std::endl;
                 std::cout << before << std::endl;
                 std::cout << V_ele << std::endl;
@@ -267,24 +267,24 @@ inline void simulate(Eigen::VectorXd &q, Eigen::VectorXd &qdot, double dt, doubl
 				}
                 V_linear_tetrahedron(V_ele, newq, V, T.row(ei), v0(ei), C, D, true);
                 exit(0);
-            }
+            }*/
         }
 
         // potential energy for each spring created when dragging
         for(unsigned int pickedi = 0; pickedi < spring_points.size(); pickedi++) {   
             V_spring_particle_particle(V_ele, spring_points[pickedi].first, newq.segment<3>(spring_points[pickedi].second), 0.0, k_selected_now);
             E += V_ele;
-            if (isnan(E)) {
+            /*if (isnan(E)) {
                 std::cout << "V: " << pickedi << std::endl;
                 exit(0);
-            }
+            }*/
         }
 
         // kinetic energy
         E += 0.5*(qdot_1 - qdot).transpose()*M*(qdot_1 - qdot);
-        if (isnan(E)) {
+        /*if (isnan(E)) {
             std::cout << "T: " << std::endl;
-        }
+        }*/
         return E;
     };
 
