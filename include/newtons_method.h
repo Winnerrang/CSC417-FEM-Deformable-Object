@@ -26,10 +26,9 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 	} while (isnan(originalEnergy));
 
 	x0 = x0 * time_scale;
-	std::cout << "Original Energy: " << originalEnergy << std::endl;
+
 	double currentEnergy = originalEnergy;
 	double newEnergy = currentEnergy;
-	int step = 0;
 
 	double tol = 1e-8;
 	double alpha_tolerance = 1e-8;
@@ -39,29 +38,15 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 	double alpha;
 
 	for (int i = 0; i < maxSteps; i++){
-		//std::cout << "Current Energy: " << currentEnergy << std::endl;
 
-		Eigen::VectorXd x_temp = x0;
 		tmp_g.setZero();
-		g(tmp_g, x_temp);
-		if (x_temp != x0) {
-			std::cout << x_temp.norm() << std::endl << x0.norm() << std::endl;
-		}
-		assert(x_temp == x0);
+		g(tmp_g, x0);
 
 		
-		x_temp = x0;
 		tmp_H.setZero();
 		H(tmp_H, x0);
-		assert(x_temp == x0);
 
-		//tmp_H.makeCompressed();
-
-		//std::cout << "compute\n";
 		solver.compute(tmp_H);
-		//std::cout << "Determinant: " << solver.determinant() << std::endl;
-		//std::cout << "Heesian nonZero: " << tmp_H. << std::endl;
-		//std::cout << "finish compute\n";
 
 		if (solver.info() != Eigen::Success)
 		{
@@ -76,28 +61,21 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 			std::cout << "No!!!\n";
 			exit(0);
 		}
-		//std::cout << "finish solve\n";
 		
 
-		//if (tmp_g.norm() < 1e-8){
-		//	//std::cout << i << std::endl;
-		//	//std::cout << "Converge!!!\n"; 
-		//	return currentEnergy;
-		//}
 
-		//std::cout << "checking\n";
+
 		 if (d.lpNorm<Eigen::Infinity>() < 1e-3){
-		 	std::cout << "Converge!!! " << currentEnergy << std::endl; 
+		 	//std::cout << "Converge!!! " << currentEnergy << std::endl; 
 		 	return currentEnergy;
 		 }
 
 		//line search
 		alpha = 1;
 
-		//std::cout << "line search\n";
 		while (isnan(newEnergy) || newEnergy >= currentEnergy + 10e-8 * d.dot(tmp_g)){
 			 if (alpha < alpha_tolerance){
-			 	std::cout << "No Choice...." << currentEnergy << std::endl; ;
+			 	//std::cout << "No Choice...." << currentEnergy << std::endl; ;
 			 	return currentEnergy;
 			 } 
 			
@@ -111,36 +89,13 @@ double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H
 			//std::cout << x0 + alpha * d << std::endl;
 			exit(0);
 		}
-		/*std::cout << "x0: " << x0.norm() << std::endl;
-		std::cout << "alpha: " << alpha << std::endl;
-		x0 = x0 + alpha * d;
-		std::cout << "x0: " << x0.norm() << std::endl;*/
+
 		x0 = x0 + alpha * d;
 
 		currentEnergy = newEnergy;
-		//std::cout << "finsh\n";
-		std::cout << "Energy: " << currentEnergy << " Gradient Norm " << d.lpNorm<Eigen::Infinity>() <<
-			" velocity norm " << x0.norm() << std::endl;
-		//if (d.lpNorm<Eigen::Infinity>() > 500) {
-		//	//std::cout << tmp_g << std::endl;
-		//	//std::cout << "Hessian\n" << d << std::endl;
-		//	
-		//	std::this_thread::sleep_for(std::chrono::seconds(100));
-		//}
 	}
 
-	// g(tmp_g, x0);
-	
-	// std::cout << "I am tired.... Original Energy: " << originalEnergy
-	// 							<< " NewEnergy: " << newEnergy 
-	// 							<< "gradient norm: " << tmp_g.norm()<< std::endl;
-	/*if (tmp_g.norm() > 10e-5){
-		std::cout << "Keep Going" << std::endl;
-		continue;
-	} */
-	std::cout << "I am tired.... Energy: " << currentEnergy << std::endl;
-	/*if (currentEnergy > 0.2) {
-		std::cout << x0 << std::endl;
-	}*/
+	//std::cout << "I am tired.... Energy: " << currentEnergy << std::endl;
+
 	return currentEnergy;
 }
