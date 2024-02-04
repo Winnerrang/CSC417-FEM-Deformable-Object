@@ -9,8 +9,10 @@ void psi_neo_hookean(double &psi,
     double J = F.determinant();
 
     if (J == 0) {
-		std::cout << "Determinant is zero!" << std::endl;
-		exit(1);
+		psi = nan("1");
+		return;
+		//std::cout << "Determinant is zero!" << std::endl;
+		//exit(1);
 	}
     psi = C * (pow(J, -2.0/3.0) * (F.transpose() * F).trace() - 3) + D * (J - 1) * (J - 1);
 

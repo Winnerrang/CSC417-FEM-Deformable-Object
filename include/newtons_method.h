@@ -17,13 +17,46 @@ using namespace std::chrono;
 template<typename Objective, typename Jacobian, typename Hessian>
 double newtons_method(Eigen::VectorXd &x0, Objective &f, Jacobian &g, Hessian &H, unsigned int maxSteps, Eigen::VectorXd &tmp_g, Eigen::SparseMatrixd &tmp_H) {
    
-	double originalEnergy; 
+	double originalEnergy = f(x0); 
 	double time_scale = 1.0;
-	
-	do {
+	double right = 1.0;
+	double left = 0;
+	double precesion = 1e-4;
+
+	// use binary search to find the time scale that makes the energy not nan
+	// this simple method is similar to CCD method
+	if (isnan(originalEnergy)) {
+		while (right - left > precesion) {
+			time_scale = (left + right) / 2;
+
+			originalEnergy = f(x0 * time_scale);
+			if (isnan(originalEnergy)) {
+				right = time_scale;
+			}
+			else {
+				left = time_scale;
+			}
+		}
+	}
+
+	// we might end up with the nan energy, so we just use the left value
+	// where its energy is not nan and its precesion is good enough
+	if (isnan(originalEnergy)) {
+		time_scale = left;
 		originalEnergy = f(x0 * time_scale);
-		if (isnan(originalEnergy)) time_scale *= 0.5;
-	} while (isnan(originalEnergy));
+	}
+
+	if (isnan(originalEnergy)) {
+		std::cout << "You did something wrong " << std::endl;
+		exit(0);
+	}
+	/*do {
+		originalEnergy = f(x0 * time_scale);
+		if (isnan(originalEnergy)) {
+			if (time_scale )
+		}
+			
+	} while (isnan(originalEnergy));*/
 
 	x0 = x0 * time_scale;
 
