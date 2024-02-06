@@ -11,7 +11,7 @@ void dphi_linear_tetrahedron_dX(Eigen::Matrix43d &dphi, Eigen::Ref<const Eigen::
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            if (isnan(T_inv(i, j))) {
+            if (std::isnan(T_inv(i, j))) {
                 std::cout << "T_inv is nan" << std::endl;
                 exit(1);
             }
